@@ -2,11 +2,14 @@
 const electron = require('electron');
 const os = require('os');
 const path = require('path');
+const fs = require('fs-extra');
 const timeStamp = require('time-stamp');
+const Turndown = require('turndown');
 const config = require('./config');
 
 const join = path.join;
 const ipc = electron.ipcRenderer;
+const dialog = electron.remote.dialog;
 const shell = electron.shell;
 const webFrame = electron.webFrame;
 
@@ -57,12 +60,45 @@ ipc.on('search', () => {
 
 ipc.on('focus-mode', () => {
   // Toggle focus mode
-  document.querySelector('#gwt-debug-NoteAttributes-focusButton').click();
+  const mode = {
+    enter() {
+      document.querySelector('#gwt-debug-NoteAttributes-focusButton').click();
+    },
+    exit() {
+      document.querySelector('#gwt-debug-NoteAttributes-doneButton').click();
+    }
+  };
+
+  const isFocusMode = () => {
+    // Check if focus-mode is already active
+    return document.querySelector('#gwt-debug-NoteAttributes-focusButton').style.length;
+  };
+
+  return isFocusMode() ? mode.exit() : mode.enter();
 });
 
-ipc.on('exit-focus-mode', () => {
-  // Exit focus mode
-  document.querySelector('#gwt-debug-NoteAttributes-doneButton').click();
+ipc.on('header-one', () => {
+  document.querySelector('#gwt-debug-FontSizeDropdown-root-THIRTY_SIX').click();
+});
+
+ipc.on('header-two', () => {
+  document.querySelector('#gwt-debug-FontSizeDropdown-root-TWENTY_FOUR').click();
+});
+
+ipc.on('header-three', () => {
+  document.querySelector('#gwt-debug-FontSizeDropdown-root-EIGHTEEN').click();
+});
+
+ipc.on('header-four', () => {
+  document.querySelector('#gwt-debug-FontSizeDropdown-root-FOURTEEN').click();
+});
+
+ipc.on('header-five', () => {
+  document.querySelector('#gwt-debug-FontSizeDropdown-root-TWELVE').click();
+});
+
+ipc.on('header-six', () => {
+  document.querySelector('#gwt-debug-FontSizeDropdown-root-TEN').click();
 });
 
 function untoggleTheme(themeName, activateFunction) {
@@ -76,10 +112,39 @@ function untoggleTheme(themeName, activateFunction) {
     default:
       break;
   }
+  // Switch to default font color
+  changeFontColor({color: 'black', theme: 'defaultMode'});
+}
+
+function getNoteFrame() {
+  // Retrieve the <iframe> tag where notes reside
+  return new Promise(resolve => {
+    function checkNoteFrame() {
+      // Wait until all notes have been loaded
+      const frame = document.querySelector('.RichTextArea-entinymce');
+      if (frame) {
+        resolve(frame);
+      }
+      setTimeout(checkNoteFrame, 50);
+    }
+    checkNoteFrame();
+  });
+}
+
+async function changeFontColor(optionsObj) {
+  // Change the default font color of all notes
+  const {color, theme} = optionsObj;
+  if (config.get(theme)) {
+    const frame = await getNoteFrame();
+    const style = document.createElement('style');
+    style.textContent = `body {color: ${color};}`;
+    return frame.contentDocument.head.appendChild(style);
+  }
 }
 
 function darkMode() {
   document.documentElement.classList.toggle('dark-mode', config.get('darkMode'));
+  changeFontColor({color: 'lightgrey', theme: 'darkMode'});
 }
 
 function untoggleDark() {
@@ -99,6 +164,7 @@ ipc.on('toggle-dark-mode', () => {
 
 function blackMode() {
   document.documentElement.classList.toggle('black-mode', config.get('blackMode'));
+  changeFontColor({color: 'lightgrey', theme: 'blackMode'});
 }
 
 function untoggleBlack() {
@@ -118,6 +184,7 @@ ipc.on('toggle-black-mode', () => {
 
 function sepiaMode() {
   document.documentElement.classList.toggle('sepia-mode', config.get('sepiaMode'));
+  changeFontColor({color: 'black', theme: 'sepiaMode'});
 }
 
 function untoggleSepia() {
@@ -141,6 +208,7 @@ function vibrantMode() {
   ipc.send('activate-vibrant');
   // Make app background transparent
   document.documentElement.style.backgroundColor = 'transparent';
+  changeFontColor({color: 'black', theme: 'vibrantMode'});
 }
 
 function untoggleVibrant() {
@@ -164,6 +232,7 @@ function vibrantDarkMode() {
   ipc.send('activate-vibrant');
   // Make app background transparent
   document.documentElement.style.backgroundColor = 'transparent';
+  changeFontColor({color: 'white', theme: 'vibrantDarkMode'});
 }
 
 function untoggleDarkVibrant() {
@@ -344,6 +413,50 @@ function exportAsPDF() {
 }
 
 ipc.on('export', exportAsPDF);
+
+async function exportAsMarkdown() {
+  // Get frame of selected note
+  const selectedNoteFrame = await getNoteFrame();
+
+  // Get note title
+  const getTitle = () => {
+    const title = document.querySelector('#gwt-debug-NoteTitleView-label').innerHTML;
+    return title.length ? title.trim().replace(/&nbsp;/g, ' ') : 'note';
+  };
+
+  // Covert note to markdown
+  const toMarkdown = noteFrame => {
+    const turndownUtil = new Turndown();
+    return turndownUtil.turndown(noteFrame.contentDocument.body);
+  };
+
+  // Saving options
+  const options = {
+    defaultPath: getTitle(),
+    filters: [{
+      name: 'Markdown File',
+      extensions: ['md']
+    }, {
+      name: 'All Files',
+      extensions: ['*']
+    }]
+  };
+
+  // Initialize saving dialog
+  dialog.showSaveDialog(options, fileName => {
+    if (fileName === undefined) {
+      return console.log('Note was not exported');
+    }
+    fs.writeFile(fileName, toMarkdown(selectedNoteFrame), error => {
+      if (error) {
+        dialog.showErrorBox('Exporting note as Markdown error', error.message);
+        return console.log(error.message);
+      }
+    });
+  });
+}
+
+ipc.on('export-as-markdown', exportAsMarkdown);
 
 function toggleAutoLaunch() {
   // Decide whether or not the app should launch on login
@@ -578,8 +691,9 @@ document.addEventListener('DOMContentLoaded', () => {
   vibrantMode();
   // Toggle vibrant dark mode
   vibrantDarkMode();
-  // Prevent white flashing screen on startup
-  if (!config.get('vibrantMode') && !config.get('vibrantDarkMode')) {
-    document.documentElement.style.backgroundColor = '#212121';
-  }
+
+  getNoteFrame().then(noteDOM => {
+    noteDOM.contentDocument.body.setAttribute('dir', 'auto');
+    document.getElementById('gwt-debug-NoteTitleView-container').setAttribute('dir', 'auto');
+  });
 });

@@ -103,9 +103,12 @@ function createMainWindow() {
 app.on('ready', () => {
   electron.Menu.setApplicationMenu(appMenu);
   mainWindow = createMainWindow();
+  if (config.get('useGlobalShortcuts')) {
+    // Check whether the global shortcuts should be activated
+    appMenu.registerGlobalShortcuts();
+  }
   if (!config.get('hideTray')) {
-    // Check whether or not the tray
-    // icon is set to be hidden
+    // Check whether the tray icon should be activated
     tray.create(mainWindow);
   }
   const windowContent = mainWindow.webContents;
@@ -128,11 +131,16 @@ app.on('ready', () => {
 
   windowContent.on('new-window', (e, url) => {
     e.preventDefault();
-    // Workaround for opening external links
+    // Workaround for managing external links
     const prefix = 'https://www.evernote.com/OutboundRedirect.action?dest=';
     // Remove prefix & decode URL
     url = decodeUri(url.replace(prefix, ''));
-    electron.shell.openExternal(url);
+    // Determine URL type
+    if (url.split('/', 4).includes('shard')) {
+      windowContent.downloadURL(url); // Initialize file download
+    } else {
+      electron.shell.openExternal(url); // Open external link in browser
+    }
   });
 
   windowContent.on('crashed', e => {
@@ -142,13 +150,9 @@ app.on('ready', () => {
   update.init(electron.Menu.getApplicationMenu());
 
   if (!isDevMode) {
-    setTimeout(() => {
-      update.checkUpdate();
-    }, ms('2m'));
-
     setInterval(() => {
-      update.checkUpdate();
-    }, ms('1h'));
+      update.autoUpdateCheck();
+    }, ms(config.get('updateCheckPeriod')));
   }
 });
 
@@ -194,7 +198,7 @@ ipcMain.on('print-to-pdf', event => {
   const filePath = path.join(tmpDir, fileName);
   // Get the window with the note that is to be printed
   const noteWindow = BrowserWindow.fromWebContents(event.sender);
-  // Intialize printing process
+  // Initialize printing process
   noteWindow.webContents.printToPDF({}, (error, data) => {
     if (error) {
       return console.log(error.message);
@@ -229,7 +233,7 @@ ipcMain.on('export-as-pdf', event => {
       extensions: ['*']
     }]
   };
-  // Intialize printing process
+  // Initialize printing process
   noteWindow.webContents.printToPDF({}, (error, data) => {
     if (error) {
       return console.log(error.message);
@@ -240,7 +244,7 @@ ipcMain.on('export-as-pdf', event => {
       if (fileName === undefined) {
         return console.log('Note was not exported');
       }
-      // Intialize the file writing process
+      // Initialize the file writing process
       fs.writeFile(fileName, data, err => {
         if (err) {
           dialog.showErrorBox('Exporting note error', err.message);

@@ -3,15 +3,19 @@ const os = require('os');
 const path = require('path');
 const electron = require('electron');
 const fs = require('fs-extra');
+const timeStamp = require('time-stamp');
 const config = require('./config');
+const update = require('./update');
 
 const join = path.join;
 const app = electron.app;
 const resolve = path.resolve;
 const shell = electron.shell;
 const appName = app.getName();
+const dialog = electron.dialog;
 const platform = process.platform;
 const BrowserWindow = electron.BrowserWindow;
+const globalShortcut = electron.globalShortcut;
 
 let configData;
 let defaultConfigPath; // Path to the default config file
@@ -26,6 +30,8 @@ const communityURL = 'https://gitter.im/klauscfhq/tusk';
 const issueURL = 'https://github.com/klauscfhq/tusk/issues/new';
 const searchURL = 'https://github.com/search?q=+is:issue+repo:klauscfhq/tusk';
 const licenseURL = 'https://github.com/klauscfhq/tusk/blob/master/license.md';
+const keyboardShortcutsRefURL = 'https://github.com/klauscfhq/tusk#keyboard-shortcuts';
+const searchFeatureRequestsURL = 'https://github.com/klauscfhq/tusk/labels/feature-request';
 
 function activate(command) {
   const [appWindow] = BrowserWindow.getAllWindows();
@@ -91,6 +97,96 @@ function setAcc(custom, predefined) {
   return predefined;
 }
 
+function showWin() {
+  // Bring main app window on top if not visible or focused
+  const appWindow = BrowserWindow.getAllWindows()[0];
+  if (!appWindow.isVisible() || !appWindow.isFocused()) {
+    appWindow.show();
+    appWindow.focus();
+  }
+}
+
+function toggleWin() {
+  // Toggle/untoggle main app window
+  const appWindow = BrowserWindow.getAllWindows()[0];
+  if (appWindow.isVisible() && appWindow.isFocused()) {
+    appWindow.hide();
+    appWindow.blur();
+  } else {
+    appWindow.show();
+    appWindow.focus();
+  }
+}
+
+function registerGlobalShortcuts() {
+  const globalToggleTusk = globalShortcut.register(
+    // Global shortcut key for toggling/untoggling main app window
+    setAcc('global-toggle-tusk', 'Shift+Alt+A'), () => {
+      toggleWin();
+    });
+
+  const globalSearchNote = globalShortcut.register(
+    // Global shortcut key for note searching
+    setAcc('global-search', 'Shift+Alt+F'), () => {
+      showWin();
+      activate('search');
+    });
+
+  const globalCreateNote = globalShortcut.register(
+    // Global shortcut key for note creation
+    setAcc('global-new-note', 'Shift+Alt+C'), () => {
+      showWin();
+      activate('new-note');
+    });
+
+  if (globalToggleTusk && globalSearchNote && globalCreateNote) {
+    console.log('Successfully registered global shortcut keys');
+  } else {
+    console.log('Global shortcut keys registration failed');
+  }
+}
+
+function confirmLogOut() {
+  const logOut = () => {
+    // Display log-out confirmation dialog
+    const response = dialog.showMessageBox({
+      icon: path.join(__dirname, 'static/Icon.png'),
+      title: 'Log Out Confirmation',
+      message: 'Log Out of Tusk',
+      detail: 'Are you sure you want to log out?',
+      buttons: ['Log Out', 'Dismiss'],
+      defaultId: 0, // Make `Log Out` the default action button
+      cancelId: 1
+    });
+    return (response === 0);
+  };
+  // Check whether the log-out button was pressed
+  if (logOut()) {
+    activate('log-out');
+  }
+}
+
+function requestAppRestart() {
+  const restart = () => {
+    // Display restart confirmation dialog on settings update
+    const response = dialog.showMessageBox({
+      icon: path.join(__dirname, 'static/Icon.png'),
+      title: 'Restart Required',
+      message: 'Restart Tusk to Activate New Settings',
+      detail: 'Would you like to restart now?',
+      buttons: ['Restart', 'Dismiss'],
+      defaultId: 0, // Make `Restart` the default action button
+      cancelId: 1
+    });
+    return (response === 0);
+  };
+  // Check whether the restart button was pressed
+  if (restart()) {
+    app.quit();
+    app.relaunch();
+  }
+}
+
 const helpSubmenu = [{
   label: `View License`,
   click() {
@@ -103,6 +199,53 @@ const helpSubmenu = [{
   label: `Tusk Homepage`,
   click() {
     shell.openExternal(homepageURL);
+  }
+}, {
+  label: `Check for Update`,
+  click() {
+    update.manualUpdateCheck();
+  }
+}, {
+  label: `Update Check Frequency`,
+  submenu: [{
+    label: 'Once Every 2 Hours',
+    type: 'checkbox',
+    checked: (config.get('updateCheckPeriod') === '2h'),
+    click() {
+      config.set('updateCheckPeriod', '2h');
+      requestAppRestart();
+    }
+  }, {
+    label: 'Once Every 6 Hours',
+    type: 'checkbox',
+    checked: (config.get('updateCheckPeriod') === '6h'),
+    click() {
+      config.set('updateCheckPeriod', '6h');
+      requestAppRestart();
+    }
+  }, {
+    label: 'Once Every 12 Hours',
+    type: 'checkbox',
+    checked: (config.get('updateCheckPeriod') === '12h'),
+    click() {
+      config.set('updateCheckPeriod', '12h');
+      requestAppRestart();
+    }
+  }, {
+    label: 'Once a Day',
+    type: 'checkbox',
+    checked: (config.get('updateCheckPeriod') === '24h'),
+    click() {
+      config.set('updateCheckPeriod', '24h');
+      requestAppRestart();
+    }
+  }]
+}, {
+  type: 'separator'
+}, {
+  label: 'Keyboard Shortcuts Reference',
+  click() {
+    shell.openExternal(keyboardShortcutsRefURL);
   }
 }, {
   type: 'separator'
@@ -122,6 +265,11 @@ const helpSubmenu = [{
     shell.openExternal(searchURL);
   }
 }, {
+  label: `Search Feature Requests`,
+  click() {
+    shell.openExternal(searchFeatureRequestsURL);
+  }
+}, {
   label: `Community Discussion`,
   click() {
     shell.openExternal(communityURL);
@@ -136,8 +284,8 @@ if (process.platform !== 'darwin') {
     click() {
       electron.dialog.showMessageBox({
         title: `About Tusk`,
-        message: `Tusk ${app.getVersion()}`,
-        detail: 'Coded with love by Klaus Sinani',
+        message: `Tusk ${app.getVersion()} (${os.arch()})`,
+        detail: 'Created by Klaus Sinani',
         icon: path.join(__dirname, 'static/Icon.png'),
         buttons: []
       });
@@ -260,15 +408,24 @@ const darwinTpl = [{
       activate('print');
     }
   }, {
-    label: 'Export Note as PDF',
-    accelerator: setAcc('export', 'CmdorCtrl+Shift+E'),
-    click() {
-      activate('export');
-    }
+    label: 'Export Note as',
+    submenu: [{
+      label: 'PDF File',
+      accelerator: setAcc('export-pdf', 'CmdorCtrl+Shift+E'),
+      click() {
+        activate('export');
+      }
+    }, {
+      label: 'Markdown File',
+      accelerator: setAcc('export-markdown', 'CmdorCtrl+O'),
+      click() {
+        activate('export-as-markdown');
+      }
+    }]
   }, {
     type: 'separator'
   }, {
-    label: 'Settings',
+    label: 'Evernote Settings',
     accelerator: setAcc('settings', 'CmdorCtrl+,'),
     click() {
       activate('settings');
@@ -282,10 +439,20 @@ const darwinTpl = [{
       activate('auto-launch');
     }
   }, {
+    type: 'separator'
+  }, {
     label: 'Edit Shortcut Keys',
     accelerator: 'CmdorCtrl+.',
     click() {
       activate('edit-shortcuts');
+    }
+  }, {
+    label: 'Enable Global Shortcut Keys',
+    type: 'checkbox',
+    checked: config.get('useGlobalShortcuts'),
+    click(item) {
+      config.set('useGlobalShortcuts', item.checked);
+      requestAppRestart();
     }
   }, {
     type: 'separator'
@@ -308,9 +475,9 @@ const darwinTpl = [{
   }, {
     type: 'separator'
   }, {
-    label: 'Log out',
+    label: 'Log Out',
     click() {
-      activate('log-out');
+      confirmLogOut();
     }
   }]
 }, {
@@ -369,20 +536,6 @@ const darwinTpl = [{
         activate('zoom-reset');
       }
     }]
-  }, {
-    type: 'separator'
-  }, {
-    label: 'Focus Mode',
-    accelerator: setAcc('focus-mode', 'CmdOrCtrl+K'),
-    click() {
-      activate('focus-mode');
-    }
-  }, {
-    label: 'Exit Focus Mode',
-    accelerator: setAcc('exit-focus-mode', 'CmdorCtrl+O'),
-    click() {
-      activate('exit-focus-mode');
-    }
   }, {
     type: 'separator'
   }, {
@@ -458,6 +611,7 @@ const darwinTpl = [{
     label: 'Toggle Side Bar',
     type: 'checkbox',
     checked: !config.get('sideBarHidden'),
+    accelerator: setAcc('toggle-sidebar', 'CmdorCtrl+\\'),
     click() {
       activate('toggle-side-bar');
     }
@@ -469,6 +623,12 @@ const darwinTpl = [{
         focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
         focusedWindow.send('window:fullscreen', {state: focusedWindow.isFullScreen()});
       }
+    }
+  }, {
+    label: 'Toggle Focus Mode',
+    accelerator: setAcc('toggle-focus-mode', 'CmdOrCtrl+K'),
+    click() {
+      activate('focus-mode');
     }
   }, {
     label: 'Toggle Developer Tools',
@@ -504,6 +664,45 @@ const darwinTpl = [{
       accelerator: setAcc('strikethrough', 'CmdorCtrl+T'),
       click() {
         activate('strikethrough');
+      }
+    }]
+  }, {
+    label: 'Font Size',
+    submenu: [{
+      label: 'Header 1',
+      accelerator: 'Alt+CmdorCtrl+1',
+      click() {
+        activate('header-one');
+      }
+    }, {
+      label: 'Header 2',
+      accelerator: 'Alt+CmdorCtrl+2',
+      click() {
+        activate('header-two');
+      }
+    }, {
+      label: 'Header 3',
+      accelerator: 'Alt+CmdorCtrl+3',
+      click() {
+        activate('header-three');
+      }
+    }, {
+      label: 'Header 4',
+      accelerator: 'Alt+CmdorCtrl+4',
+      click() {
+        activate('header-four');
+      }
+    }, {
+      label: 'Header 5',
+      accelerator: 'Alt+CmdorCtrl+5',
+      click() {
+        activate('header-five');
+      }
+    }, {
+      label: 'Header 6',
+      accelerator: 'Alt+CmdorCtrl+6',
+      click() {
+        activate('header-six');
       }
     }]
   }, {
@@ -576,8 +775,26 @@ const darwinTpl = [{
   }, {
     type: 'separator'
   }, {
+    label: 'Insert Date Stamp',
+    accelerator: setAcc('date-stamp', 'CmdOrCtrl+Shift+;'),
+    click() {
+      const dateStamp = timeStamp('MM/DD/YYYY');
+      const appWindow = BrowserWindow.getAllWindows()[0];
+      appWindow.webContents.insertText(dateStamp);
+    }
+  }, {
+    label: 'Insert Date-Time Stamp',
+    accelerator: setAcc('date-time-stamp', 'CmdOrCtrl+;'),
+    click() {
+      const dateTimeStamp = timeStamp('MM/DD/YYYY HH:mm');
+      const appWindow = BrowserWindow.getAllWindows()[0];
+      appWindow.webContents.insertText(dateTimeStamp);
+    }
+  }, {
+    type: 'separator'
+  }, {
     label: 'Checkbox',
-    accelerator: setAcc('checkbox', 'CmdorCtrl+Shift+C'),
+    accelerator: setAcc('checkbox', 'CmdorCtrl+Shift+B'),
     click() {
       activate('checkbox');
     }
@@ -729,15 +946,24 @@ const otherTpl = [{
       activate('print');
     }
   }, {
-    label: 'Export Note as PDF',
-    accelerator: setAcc('export', 'CmdorCtrl+Shift+E'),
-    click() {
-      activate('export');
-    }
+    label: 'Export Note as',
+    submenu: [{
+      label: 'PDF File',
+      accelerator: setAcc('export-pdf', 'CmdorCtrl+Shift+E'),
+      click() {
+        activate('export');
+      }
+    }, {
+      label: 'Markdown File',
+      accelerator: setAcc('export-markdown', 'CmdorCtrl+O'),
+      click() {
+        activate('export-as-markdown');
+      }
+    }]
   }, {
     type: 'separator'
   }, {
-    label: 'Settings',
+    label: 'Evernote Settings',
     accelerator: setAcc('settings', 'CmdorCtrl+,'),
     click() {
       activate('settings');
@@ -760,10 +986,20 @@ const otherTpl = [{
       config.set('launchMinimized', item.checked);
     }
   }, {
+    type: 'separator'
+  }, {
     label: 'Edit Shortcut Keys',
     accelerator: 'CmdorCtrl+.',
     click() {
       activate('edit-shortcuts');
+    }
+  }, {
+    label: 'Enable Global Shortcut Keys',
+    type: 'checkbox',
+    checked: config.get('useGlobalShortcuts'),
+    click(item) {
+      config.set('useGlobalShortcuts', item.checked);
+      requestAppRestart();
     }
   }, {
     type: 'separator'
@@ -772,23 +1008,21 @@ const otherTpl = [{
     visible: !config.get('useYinxiang'),
     click() {
       config.set('useYinxiang', true);
-      app.relaunch();
-      app.quit();
+      requestAppRestart();
     }
   }, {
     label: 'Switch to Evernote',
     visible: config.get('useYinxiang'),
     click() {
       config.set('useYinxiang', false);
-      app.relaunch();
-      app.quit();
+      requestAppRestart();
     }
   }, {
     type: 'separator'
   }, {
-    label: 'Log out',
+    label: 'Log Out',
     click() {
-      activate('log-out');
+      confirmLogOut();
     }
   }, {
     type: 'separator'
@@ -854,20 +1088,6 @@ const otherTpl = [{
   }, {
     type: 'separator'
   }, {
-    label: 'Focus Mode',
-    accelerator: setAcc('focus-mode', 'CmdOrCtrl+K'),
-    click() {
-      activate('focus-mode');
-    }
-  }, {
-    label: 'Exit Focus Mode',
-    accelerator: setAcc('exit-focus-mode', 'CmdorCtrl+O'),
-    click() {
-      activate('exit-focus-mode');
-    }
-  }, {
-    type: 'separator'
-  }, {
     label: 'Toggle Theme',
     submenu: [{
       label: 'Sepia Theme',
@@ -928,8 +1148,7 @@ const otherTpl = [{
     checked: config.get('hideTray'),
     click(item) {
       config.set('hideTray', item.checked);
-      app.relaunch();
-      app.quit();
+      requestAppRestart();
     }
   }, {
     type: 'separator'
@@ -937,6 +1156,7 @@ const otherTpl = [{
     label: 'Toggle Side Bar',
     type: 'checkbox',
     checked: !config.get('sideBarHidden'),
+    accelerator: setAcc('toggle-sidebar', 'CmdorCtrl+\\'),
     click() {
       activate('toggle-side-bar');
     }
@@ -955,6 +1175,12 @@ const otherTpl = [{
         focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
         focusedWindow.send('window:fullscreen', {state: focusedWindow.isFullScreen()});
       }
+    }
+  }, {
+    label: 'Toggle Focus Mode',
+    accelerator: setAcc('toggle-focus-mode', 'CmdOrCtrl+K'),
+    click() {
+      activate('focus-mode');
     }
   }, {
     label: 'Toggle Developer Tools',
@@ -990,6 +1216,45 @@ const otherTpl = [{
       accelerator: setAcc('strikethrough', 'CmdorCtrl+T'),
       click() {
         activate('strikethrough');
+      }
+    }]
+  }, {
+    label: 'Font Size',
+    submenu: [{
+      label: 'Header 1',
+      accelerator: 'Alt+CmdorCtrl+1',
+      click() {
+        activate('header-one');
+      }
+    }, {
+      label: 'Header 2',
+      accelerator: 'Alt+CmdorCtrl+2',
+      click() {
+        activate('header-two');
+      }
+    }, {
+      label: 'Header 3',
+      accelerator: 'Alt+CmdorCtrl+3',
+      click() {
+        activate('header-three');
+      }
+    }, {
+      label: 'Header 4',
+      accelerator: 'Alt+CmdorCtrl+4',
+      click() {
+        activate('header-four');
+      }
+    }, {
+      label: 'Header 5',
+      accelerator: 'Alt+CmdorCtrl+5',
+      click() {
+        activate('header-five');
+      }
+    }, {
+      label: 'Header 6',
+      accelerator: 'Alt+CmdorCtrl+6',
+      click() {
+        activate('header-six');
       }
     }]
   }, {
@@ -1062,8 +1327,26 @@ const otherTpl = [{
   }, {
     type: 'separator'
   }, {
+    label: 'Insert Date Stamp',
+    accelerator: setAcc('date-stamp', 'CmdOrCtrl+Shift+;'),
+    click() {
+      const dateStamp = timeStamp('MM/DD/YYYY');
+      const appWindow = BrowserWindow.getAllWindows()[0];
+      appWindow.webContents.insertText(dateStamp);
+    }
+  }, {
+    label: 'Insert Date-Time Stamp',
+    accelerator: setAcc('date-time-stamp', 'CmdOrCtrl+;'),
+    click() {
+      const dateTimeStamp = timeStamp('MM/DD/YYYY HH:mm');
+      const appWindow = BrowserWindow.getAllWindows()[0];
+      appWindow.webContents.insertText(dateTimeStamp);
+    }
+  }, {
+    type: 'separator'
+  }, {
     label: 'Checkbox',
-    accelerator: setAcc('checkbox', 'CmdorCtrl+Shift+C'),
+    accelerator: setAcc('checkbox', 'CmdorCtrl+Shift+B'),
     click() {
       activate('checkbox');
     }
@@ -1110,3 +1393,5 @@ const otherTpl = [{
 const tpl = process.platform === 'darwin' ? darwinTpl : otherTpl;
 
 module.exports = electron.Menu.buildFromTemplate(tpl);
+
+module.exports.registerGlobalShortcuts = registerGlobalShortcuts;

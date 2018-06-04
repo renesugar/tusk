@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/logo.png" width="20%"><br/>Tusk
+  <img src="https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/logo.png" width="19%"><br/>Tusk
 </h1>
 
 <h4 align="center">
@@ -12,43 +12,44 @@
       </a>
 </div>
 
-[![Build Status](https://travis-ci.org/klauscfhq/tusk.svg?branch=master)](https://travis-ci.org/klauscfhq/tusk) [![Build status](https://ci.appveyor.com/api/projects/status/kdpb85rhfkw8iif7?svg=true)](https://ci.appveyor.com/project/klauscfhq/tusk) [![Dependency Status](https://dependencyci.com/github/champloohq/tusk/badge)](https://dependencyci.com/github/klauscfhq/tusk) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/klauscfhq/tusk) [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/klauscfhq/tusk) [![DLs](https://img.shields.io/github/downloads/klauscfhq/tusk/total.svg)](https://github.com/klauscfhq/tusk/releases) [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome-electron)
+<p align="center">
+  <a href="https://travis-ci.org/klauscfhq/tusk">
+    <img alt="Build Status" src="https://travis-ci.org/klauscfhq/tusk.svg?branch=master">
+  </a>
+  <a href="https://ci.appveyor.com/project/klauscfhq/tusk">
+    <img alt="Build Status" src="https://ci.appveyor.com/api/projects/status/kdpb85rhfkw8iif7?svg=true">
+  </a>
+  <a href="https://github.com/sindresorhus/awesome-electron">
+    <img alt="Awesome" src="https://awesome.re/mentioned-badge.svg">
+  </a>
+</p>
 
 ## Description
 
-Tusk is an unofficial, open source, third-party, community driven, free Evernote app with a handful of useful features.
+Tusk is an unofficial, featureful, open source, community-driven, free Evernote app used by people in more than [130 countries](https://snapcraft.io/tusk).
 
-Come over to our [Gitter](https://gitter.im/klauscfhq/tusk) channel to share your thoughts on the project or to just say hi.
+Come over to [Gitter](https://gitter.im/klauscfhq/tusk) or [Twitter](https://twitter.com/klauscfhq) to share your thoughts on the project.
 
 You can find more desktop apps [here](#related-apps).
 
 ## Highlights
 
-- [Vibrant Themes](#vibrant-themes) 🍎
-- [Sepia Theme](#sepia-theme)
-- [Dark Theme](#dark-theme)
-- [Black Theme](#black-theme)
-- [Focus Mode](#focus-mode)
-- [Compact Mode](#compact-mode)
-- [Note Navigation](#note-navigation)
+- [Black](#black-theme), [Dark](#dark-theme), [Sepia](#sepia-theme) & [Vibrant](#vibrant-themes) Themes
+- [Focus](#focus-mode), [Compact](#compact-mode) & [Auto-Night](#auto-night-mode) Modes
+- [Local](#local-shortcut-keys) & [Global](#global-shortcut-keys) Keyboard Shortcuts
+- [Customizable Keyboard Shortcuts](#custom-shortcut-keys)
+- Export Notes as [PDF](#export-notes-as-pdf) & [Markdown](#export-notes-as-markdown) files
 - [Note Printing](#note-printing)
-- [Custom Shortcut Keys](#custom-shortcut-keys)
 - [Scalable Interface](#scalable-interface)
-- [Export Notes](#export-notes)
+- [Note Navigation](#note-navigation)
 - [Yinxiang Support](#yinxiang-support)
-- [Auto Night Mode](#auto-night-mode)
-- [Keyboard Shortcuts](#keyboard-shortcuts)
-- [Build-in Markdown](#build-in-markdown)
-- [Cross Platform](https://github.com/klauscfhq/tusk/releases/latest)
-- Automagical Auto-updates 🐘
-- In-app Notifications
-- Background Behavior
-- Launch on Start
-- Launch Minimized
+- Cross Platform
+- Automatic Updates 🐘
+- RTL Support
+- Deep OS Integration
 - Drag and Drop Files
 
-<sup>🍎 Macos only atm</sup><br/>
-<sup>🐘 Windows only atm</sup>
+<sup>🐘 Windows & Linux only atm</sup>
 
 ## Contents
 
@@ -56,6 +57,8 @@ You can find more desktop apps [here](#related-apps).
 - [Highlights](#highlights)
 - [Install](#install)
 - [Features](#features)
+- [Keyboard Shortcuts](#keyboard-shortcuts)
+- [Development](#development)
 - [Related Apps](#related-apps)
 - [Team](#team)
 - [Disclaimer](#disclaimer)
@@ -63,11 +66,21 @@ You can find more desktop apps [here](#related-apps).
 
 ## Install
 
+#### Github Releases
+
 Head to the [releases](https://github.com/klauscfhq/tusk/releases/latest) page and download the appropriate installer for your system.
+
+#### Snap
+
+Ubuntu Linux users can directly install through [Snap](https://snapcraft.io/tusk) `snap install tusk`
+
+#### Homebrew
 
 Macos users can directly install through [Homebrew Cask](https://caskroom.github.io/) `brew cask install tusk`
 
-Arch Linux users can directly install through [AUR](https://aur.archlinux.org/packages/tusk/) `yaourt tusk`   
+#### AUR
+
+Arch Linux users can directly install through [AUR](https://aur.archlinux.org/packages/tusk/) `yaourt tusk`
 
 #### Note
 
@@ -77,11 +90,13 @@ The version available on `Homebrew Cask` or `AUR` may not be the latest. If that
 
 ### Vibrant Themes
 
-Refreshing [dark](https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/vibrant-dark-theme.png) and [light](https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/vibrant-light-theme.png) vibrant themes. Press <kbd>Cmd</kbd> <kbd>Alt</kbd> <kbd>U</kbd> / <kbd>Cmd</kbd> <kbd>Alt</kbd> <kbd>J</kbd> to activate them respectively.
+Press <kbd>Cmd</kbd> <kbd>Alt</kbd> <kbd>U</kbd> / <kbd>Cmd</kbd> <kbd>Alt</kbd> <kbd>J</kbd> to activate the [dark](https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/vibrant-dark-theme.png) or [light](https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/vibrant-light-theme.png) vibrant theme respectively.
+
+Please note that the feature is available [**only on Macos**](https://github.com/klauscfhq/tusk/issues/19).
 
 <div align="center">
       <a href="https://github.com/klauscfhq/tusk">
-        <img src="https://cdn.rawgit.com/klauscfhq/tusk/33f2eae5/media/vibrant-theme.png" alt="Tusk Vibrant Theme" width="100%">
+        <img src="media/vibrant-theme.png" alt="Tusk Vibrant Theme" width="100%">
       </a>
 </div>
 
@@ -175,7 +190,7 @@ Adjust the zooming factor to your own preference by pressing <kbd>Cmd/Ctrl</kbd>
       </a>
 </div>
 
-### Export Notes
+### Export Notes as PDF
 
 Press <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>E</kbd> and save your notes effortlessly on your machine as `pdf` files.
 
@@ -187,7 +202,7 @@ Press <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>E</kbd> and save your notes effo
 
 ### Yinxiang Support
 
-Login with your Yinxiang account by visiting the `Tusk` menu on Macos or the `File` menu on Windows and Linux.
+Login with your Yinxiang account by using the `File` > `Switch to Yinxiang` option.
 
 <div align="center">
       <a href="https://github.com/klauscfhq/tusk">
@@ -199,9 +214,20 @@ Login with your Yinxiang account by visiting the `Tusk` menu on Macos or the `Fi
 
 Press <kbd>Cmd/Ctrl</kbd> <kbd>Alt</kbd> <kbd>N</kbd> and allow Tusk to intelligently adjust to your environment.
 
-### Keyboard shortcuts
+### Export Notes as Markdown
 
-60+ keyboard shortcuts. Toggle anything in a flash.
+Press <kbd>Cmd/Ctrl</kbd> <kbd>O</kbd> and instantly export your notes as `markdown` files.
+
+## Keyboard Shortcuts
+
+### Local Shortcut Keys
+
+70+ local keyboard shortcuts. Toggle anything in a flash.
+
+<details>
+<summary>View all the available local keyboard shortcuts.</summary>
+
+<br/>
 
 Description                | Keys
 -------------------------- | --------------------------
@@ -212,7 +238,6 @@ Delete Note                | <kbd>Delete</kbd>
 Toggle Dark Theme          | <kbd>Cmd/Ctrl</kbd> <kbd>D</kbd>
 Toggle Sepia Theme         | <kbd>Cmd/Ctrl</kbd> <kbd>G</kbd>
 Toggle Focus Mode          | <kbd>Cmd/Ctrl</kbd> <kbd>K</kbd>
-Exit Focus Mode            | <kbd>Cmd/Ctrl</kbd> <kbd>O</kbd>
 New Note                   | <kbd>Cmd/Ctrl</kbd> <kbd>N</kbd>
 Save Note                  | <kbd>Cmd/Ctrl</kbd> <kbd>S</kbd>
 Set Reminder               | <kbd>Cmd/Ctrl</kbd> <kbd>E</kbd>
@@ -221,14 +246,18 @@ Bold Text                  | <kbd>Cmd/Ctrl</kbd> <kbd>B</kbd>
 Italic Text                | <kbd>Cmd/Ctrl</kbd> <kbd>I</kbd>
 Underline Text             | <kbd>Cmd/Ctrl</kbd> <kbd>U</kbd>
 Strikethrough Text         | <kbd>Cmd/Ctrl</kbd> <kbd>T</kbd>
+Export Note as Markdown    | <kbd>Cmd/Ctrl</kbd> <kbd>O</kbd>
+Insert Date-Time Stamp     | <kbd>Cmd/Ctrl</kbd> <kbd>;</kbd>
 Toggle Settings            | <kbd>Cmd/Ctrl</kbd> <kbd>,</kbd>
 Make Text Smaller          | <kbd>Cmd/Ctrl</kbd> <kbd>-</kbd>
 Edit Shortcut Keys         | <kbd>Cmd/Ctrl</kbd> <kbd>.</kbd>
 Reset Zoom Level           | <kbd>Cmd/Ctrl</kbd> <kbd>0</kbd>
+Toggle Sidebar             | <kbd>Cmd/Ctrl</kbd> <kbd>\\</kbd>
 Navigate to Next Note      | <kbd>Cmd/Ctrl</kbd> <kbd>Tab</kbd>
 Toggle Tags                | <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>T</kbd>
 Toggle Notebooks           | <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>N</kbd>
 Jump to Note               | <kbd>Cmd/Ctrl</kbd> <kbd>1</kbd> - <kbd>9</kbd>
+Change Font Size           | <kbd>Cmd/Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd> - <kbd>6</kbd>
 Toggle Black Theme         | <kbd>Cmd/Ctrl</kbd> <kbd>Alt</kbd> <kbd>E</kbd>
 Toggle Vibrant Light Theme | <kbd>Cmd/Ctrl</kbd> <kbd>Alt</kbd> <kbd>U</kbd>
 Toggle Vibrant Dark Theme  | <kbd>Cmd/Ctrl</kbd> <kbd>Alt</kbd> <kbd>J</kbd>
@@ -243,7 +272,7 @@ Make Text Larger           | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>=</kbd>
 Export Note as PDF         | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>E</kbd>
 New Tag                    | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>T</kbd>
 New Notebook               | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>N</kbd>
-Toggle Checkbox            | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>C</kbd>
+Toggle Checkbox            | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>B</kbd>
 Code Block                 | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>L</kbd>
 Add Link                   | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>K</kbd>
 Attach File                | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>F</kbd>
@@ -254,6 +283,7 @@ Toggle Shortcuts           | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>S</kbd>
 Toggle Dev Tools           | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>I</kbd>
 Reload Tusk                | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>R</kbd>
 Set Always on Top          | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>P</kbd>
+Insert Date Stamp          | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>;</kbd>
 Bulleted List              | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>.</kbd>
 Subscript Text             | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>]</kbd>
 Superscript Text           | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>[</kbd>
@@ -261,46 +291,55 @@ Insert Horizontal Rule     | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>-</kbd>
 Navigate to Previews Note  | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>Tab</kbd>
 Remove Formatting          | <kbd>Cmd/Ctrl</kbd> <kbd>Shift</kbd> <kbd>Space</kbd>
 
-### Build-in Markdown
+<br/>
 
-Tusk takes advantage of the build-in Markdown support that lives inside the Evernote web editor.
+</details>
 
-Here is cheat-sheet with all the available options.<br/>
-Is a syntax option missing? Open a [`pull-request`](https://github.com/klauscfhq/tusk/compare) or [`issue`](https://github.com/klauscfhq/tusk/issues/new) to include it.
+### Global Shortcut Keys
 
-Description         | Syntax
-------------------- | ---------
-Bold text           | `**Bold**`
-Italic text         | `*Italic*`
-Highlight text      | `!!Highlight!!`
-Strikethrough text  | `~~Strikethrough~~`
-Bulleted list       | `* Bulleted list`
-Numbered list       | `1. Numbered list`
-Toggle Checkbox     | `[]`
-Complete Checkbox   | `[x]`
-Inline code         | \`Inline code\`
-Code block          | \```\nCode block\n\```
-Horizontal rule     | `---` or `===`
+Access Tusk at any moment from anywhere within your operating system. All global shortcuts can be customized to match your own preference through the configuration file `~/.tusk.json`.
 
-<sub>`\n` is the `new line` character</sub>
+<details>
+<summary>View all the available global keyboard shortcuts.</summary>
+
+<br/>
+
+Description                | Global Shortcut
+-------------------------- | --------------------------
+Toggle Tusk Window         | <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>A</kbd>
+Create New Note            | <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>C</kbd>
+Search Notes               | <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>F</kbd>
+
+<br/>
+
+</details>
+
+## Development
+
+For more info on how to contribute to the project, please read the [contributing guidelines](https://github.com/klauscfhq/tusk/blob/master/contributing.md).
+
+- Fork the repository and clone it to your machine
+- Navigate to your local fork: `cd tusk`
+- Install the project dependencies: `npm install` or `yarn install`
+- Run Tusk on dev mode: `npm start` or `yarn start`
+- Lint code for errors: `npm test` or `yarn test`
+- Build binaries and installers: `npm run dist` or `yarn dist`
 
 ## Related Apps
 
-More awesome desktop apps.
-
-- [Ao](https://github.com/klauscfhq/ao) - ✔️ Elegant Microsoft To-Do desktop app.
+- [Ao](https://github.com/klauscfhq/ao) - Elegant Microsoft To-Do desktop app.
 
 ## Team
 
 Coded with ❤ by
 
-- Klaus Sinani [(@klauscfhq)](https://github.com/klauscfhq) 
+- Klaus Sinani [(@klauscfhq)](https://github.com/klauscfhq)
 - Mario Sinani [(@mariocfhq)](https://github.com/mariocfhq)
 - Thanasis Gkanos [(@ThanasisGkanos)](https://github.com/ThanasisGkanos)
 
 ## Disclaimer
 
-Tusk is an unofficial, open source, third-party, community driven, free app and is not affiliated in any way with Evernote.
+Tusk is an unofficial, open source, third-party, community-driven, free app and is not affiliated in any way with Evernote.
 
 ## License
 
